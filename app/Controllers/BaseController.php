@@ -55,4 +55,16 @@ abstract class BaseController extends Controller
 
         // E.g.: $this->session = service('session');
     }
+
+    /**
+     * @param string $view
+     * @param array $data
+     * @param string $layout
+     * @return string
+     */
+    protected function render(string $view, array $data = [], string $layout = 'layouts/default'): string
+    {
+        $content = view($view, $data);
+        return view($layout, array_merge($data, ['content' => $content]));
+    }
 }

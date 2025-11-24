@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+    db:
+      container_name: postgres
+      image: postgres:18
+      restart: unless-stopped
+      env_file:
+        - .env.example
+      environment:
+        - POSTGRES_USER=${POSTGRES_USER:-postgres}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+        - POSTGRES_DB=${POSTGRES_DB:-postgres}
+      ports:
+        - 5444:5432
+      volumes:
+        - ./base/postgres/data:/var/lib/postgresql
+      networks:
+        - backend
+
+networks:
+  backend:

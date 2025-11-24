@@ -137,3 +137,9 @@ phpunit.xml.dist
 
 # Build artifacts
 builds/
+
+#-------------------------
+# Database directory
+#-------------------------
+base/postgres/data/*
+!base/postgres/data/.gitkeep

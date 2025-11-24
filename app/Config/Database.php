@@ -24,32 +24,7 @@ class Database extends Config
      *
      * @var array<string, mixed>
      */
-    public array $default = [
-        'DSN'          => '',
-        'hostname'     => 'localhost',
-        'username'     => '',
-        'password'     => '',
-        'database'     => '',
-        'DBDriver'     => 'MySQLi',
-        'DBPrefix'     => '',
-        'pConnect'     => false,
-        'DBDebug'      => true,
-        'charset'      => 'utf8mb4',
-        'DBCollat'     => 'utf8mb4_general_ci',
-        'swapPre'      => '',
-        'encrypt'      => false,
-        'compress'     => false,
-        'strictOn'     => false,
-        'failover'     => [],
-        'port'         => 3306,
-        'numberNative' => false,
-        'foundRows'    => false,
-        'dateFormat'   => [
-            'date'     => 'Y-m-d',
-            'datetime' => 'Y-m-d H:i:s',
-            'time'     => 'H:i:s',
-        ],
-    ];
+    public array $default = [];
 
     //    /**
     //     * Sample database connection for SQLite3.
@@ -199,5 +174,34 @@ class Database extends Config
         if (ENVIRONMENT === 'testing') {
             $this->defaultGroup = 'tests';
         }
+
+        // Initialize default database connection from environment variables
+        // Используем те же переменные, что и в docker-compose.yml
+        $this->default = [
+            'DSN'          => env('DB_DSN', ''),
+            'hostname'     => env('DB_HOST', ''),
+            'username'     => env('POSTGRES_USER', ''),
+            'password'     => env('POSTGRES_PASSWORD', ''),
+            'database'     => env('POSTGRES_DB', ''),
+            'schema'       => env('DB_SCHEMA', ''),
+            'DBDriver'     => env('DB_DRIVER', ''),
+            'DBPrefix'     => env('DB_PREFIX', ''),
+            'pConnect'     => env('DB_PCONNECT', false),
+            'DBDebug'      => env('DB_DEBUG', true),
+            'charset'      => env('DB_CHARSET', 'utf8'),
+            'swapPre'      => env('DB_SWAP_PRE', ''),
+            'encrypt'      => env('DB_ENCRYPT', false),
+            'compress'     => env('DB_COMPRESS', false),
+            'strictOn'     => env('DB_STRICT_ON', false),
+            'failover'     => [],
+            'port'         => env('DB_PORT', 5444),
+            'numberNative' => env('DB_NUMBER_NATIVE', false),
+            'foundRows'    => env('DB_FOUND_ROWS', false),
+            'dateFormat'   => [
+                'date'     => 'Y-m-d',
+                'datetime' => 'Y-m-d H:i:s',
+                'time'     => 'H:i:s',
+            ],
+        ];
     }
 }
