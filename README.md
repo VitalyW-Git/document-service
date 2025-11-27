@@ -9,14 +9,13 @@
    `docker exec postgres createdb -U root postgres`
 
 ## Создание новой миграции
-1. php spark make:migration NameMigration
-
-2. Добавить `up()` и `down()`.
-
-## Накатывание миграций в контейнерную БД
 1. Выполнить проверку окружения из раздела выше.
 
-2. Запустить миграции в локальном PHP (установить pgsql/pdo_pgsql/intl):
+2. php spark make:migration NameMigration
+
+3. Добавить `up()` и `down()`.
+
+4. Запустить миграции (установить pgsql/pdo_pgsql/intl):
    `php spark migrate`
 
 ## Откат миграций
