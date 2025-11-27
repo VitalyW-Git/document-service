@@ -65,6 +65,7 @@ writable/debugbar/*
 !writable/debugbar/index.html
 
 writable/temp/*
+!writable/temp/index.html
 
 php_errors.log
 
