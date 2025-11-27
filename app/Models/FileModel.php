@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Entities\FileEntity;
+
 final class FileModel extends AbstractModel
 {
     protected $table = 'files';
+    protected $returnType = FileEntity::class;
 
     protected $allowedFields = [
         'id',

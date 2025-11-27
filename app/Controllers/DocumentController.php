@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Entities\FileEntity;
+use App\Entities\FileRowEntity;
 use App\Models\FileModel;
 use App\Models\FileRowModel;
 use App\Models\ActivityLogModel;
@@ -35,27 +37,28 @@ class DocumentController extends BaseController
         $files = $this->fileModel->orderBy('created_at', 'DESC')
             ->paginate($perPage, 'default', $page);
 
+        $filesForView = array_map(
+            static fn (FileEntity $file) => $file->toArray(),
+            $files
+        );
+
         return view('Document/index', [
-            'files' => $files,
+            'files' => $filesForView,
             'pager' => $this->fileModel->pager,
         ]);
     }
 
     public function view($id)
     {
+        /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             return redirect()->to('/Document')->with('error', 'Файл не найден');
         }
 
-        $data = [
-            'file' => $file,
-        ];
-
-        return view('Document/view', ['file' => $file]);
+        return view('Document/view', ['file' => $file->toArray()]);
     }
 
-    
     public function upload()
     {
         $file = $this->request->getFile('file');
@@ -120,22 +123,23 @@ class DocumentController extends BaseController
 
     public function getRows(string $id)
     {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Только AJAX запросы']);
-        }
-
         $page = $this->request->getGet('page') ?? 1;
         $perPage = 5;
 
-        $rows = $this->fileRowModel->where('file_id', $id)
+        $fileRows = $this->fileRowModel
+            ->where('file_id', $id)
             ->orderBy('row_index', 'ASC')
             ->paginate($perPage, 'default', $page);
 
-        $decodedRows = [];
-        foreach ($rows as $row) {
-            $row['row_data'] = json_decode($row['row_data'], true);
-            $decodedRows[] = $row;
-        }
+        $decodedRows = array_map(
+            static function (FileRowEntity $row): array {
+                $rowArray = $row->toArray();
+                $rowArray['row_data'] = $row->row_data;
+
+                return $rowArray;
+            },
+            $fileRows
+        );
 
         return $this->response->setJSON([
             'list' =>  $decodedRows,
@@ -146,32 +150,29 @@ class DocumentController extends BaseController
 
     public function addRow(string $id)
     {
-        if (!$this->request->isAJAX()) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Только AJAX запросы']);
-        }
-
+        /** @var FileEntity|null $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             return $this->response->setJSON(['success' => false, 'message' => 'Файл не найден']);
         }
 
         $postData = $this->request->getPost();
-        unset($postData['csrf_test_name']);
 
-        $maxIndex = $this->fileRowModel->where('file_id', $id)
+        /** @var FileRowEntity $fileRowMaxIndex */
+        $fileRowMaxIndex = $this->fileRowModel->asArray()
+            ->where('file_id', $file->id)
             ->selectMax('row_index')
             ->first();
-        $newIndex = ($maxIndex['row_index'] ?? 0) + 1;
+        $newIndex = ($fileRowMaxIndex->row_index ?? 0) + 1;
 
         $rowId = $this->fileRowModel->insert([
-            'file_id' => $id,
+            'file_id' => $file->id,
             'row_data' => json_encode($postData, JSON_UNESCAPED_UNICODE),
             'row_index' => $newIndex,
         ]);
 
-        $file = $this->fileModel->find($id);
-        $this->fileModel->update($id, ['row_count' => ($file['row_count'] ?? 0) + 1]);
-        $this->logActivity($id, 'add_row', "Добавлена строка #{$newIndex}");
+        $this->fileModel->update($file->id, ['row_count' => ($file->row_count ?? 0) + 1]);
+        $this->logActivity($file->id, 'add_row', "Добавлена строка #{$newIndex}");
 
         return $this->response->setJSON([
             'success' => true,
@@ -182,20 +183,23 @@ class DocumentController extends BaseController
 
     public function updateRow(string $id, string $rowId)
     {
-        /** @var FileRowModel $rowModel */
+        /** @var FileEntity $file */
+        $file = $this->fileModel->find($id);
+        if (!$file) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Файл не найден']);
+        }
+        /** @var FileRowEntity $rowModel */
         $rowModel = $this->fileRowModel->find($rowId);
-        if (!$rowModel) {
+        if (!$rowModel && $file->id !== $rowModel->file_id) {
             return $this->response->setJSON(['success' => false, 'message' => 'Строка не найдена']);
         }
 
         $postData = $this->request->getPost();
-        unset($postData['csrf_test_name']);
-
         $this->fileRowModel->update($rowId, [
             'row_data' => json_encode($postData, JSON_UNESCAPED_UNICODE),
         ]);
 
-        $this->logActivity($id, 'update_row', "Обновлена строка #{$rowModel['row_index']}");
+        $this->logActivity($file->id, 'update_row', "Обновлена строка #{$rowModel->row_index}");
 
         return $this->response->setJSON([
             'success' => true,
@@ -205,20 +209,22 @@ class DocumentController extends BaseController
 
     public function deleteRow(string $id, string $rowId)
     {
+        /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             return $this->response->setJSON(['success' => false, 'message' => 'Файл не найден']);
         }
 
+        /** @var FileRowEntity $rowModel */
         $rowModel = $this->fileRowModel->find($rowId);
-        if (!$rowModel || $rowModel['file_id'] != $id) {
+        if (!$rowModel && $file->id !== $rowModel->file_id) {
             return $this->response->setJSON(['success' => false, 'message' => 'Строка не найдена']);
         }
 
         $this->fileRowModel->delete($rowId);
-        $file = $this->fileModel->find($id);
-        $this->fileModel->update($id, ['row_count' => max(0, ($file['row_count'] ?? 0) - 1)]);
-        $this->logActivity($id, 'delete_row', "Удалена строка #{$rowModel['row_index']}");
+        $currentCount = $file->row_count ?? 0;
+        $this->fileModel->update($file->id, ['row_count' => max(0, $currentCount - 1)]);
+        $this->logActivity($file->id, 'delete_row', "Удалена строка #{$rowModel->row_index}");
 
         return $this->response->setJSON([
             'success' => true,
@@ -228,18 +234,19 @@ class DocumentController extends BaseController
 
     public function delete(string $id)
     {
+        /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             return $this->response->setJSON(['success' => false, 'message' => 'Файл не найден']);
         }
 
-        if (file_exists($file['file_path'])) {
-            unlink($file['file_path']);
+        if (file_exists($file->file_path)) {
+            unlink($file->file_path);
         }
 
-        $this->fileRowModel->where('file_id', $id)->delete();
-        $this->fileModel->delete($id);
-        $this->logActivity($id, 'delete_file', "Удален файл: {$file['original_name']}");
+        $this->fileRowModel->where('file_id', $file->id)->delete();
+        $this->fileModel->delete($file->id);
+        $this->logActivity($file->id, 'delete_file', "Удален файл: {$file->original_name}");
 
         return $this->response->setJSON([
             'success' => true,
@@ -249,12 +256,14 @@ class DocumentController extends BaseController
 
     public function exportExcel(string $id)
     {
+        /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             return redirect()->to('/Document')->with('error', 'Файл не найден');
         }
 
-        $rows = $this->fileRowModel->where('file_id', $id)
+        $rows = $this->fileRowModel
+            ->where('file_id', $file->id)
             ->orderBy('row_index', 'ASC')
             ->findAll();
 
@@ -263,7 +272,7 @@ class DocumentController extends BaseController
         $sheet->setTitle('Данные');
 
         if (!empty($rows)) {
-            $firstRow = json_decode($rows[0]['row_data'], true);
+            $firstRow = $rows[0]->row_data;
             $headers = array_keys($firstRow);
             
             $col = 'A';
@@ -274,7 +283,7 @@ class DocumentController extends BaseController
 
             $rowNum = 2;
             foreach ($rows as $row) {
-                $rowData = json_decode($row['row_data'], true);
+                $rowData = $row->row_data;
                 $col = 'A';
                 foreach ($headers as $header) {
                     $sheet->setCellValue($col . $rowNum, $rowData[$header] ?? '');
@@ -293,26 +302,28 @@ class DocumentController extends BaseController
 
         $writer->save($filename);
 
-        $this->logActivity($id, 'export_excel', "Экспорт в Excel: {$file['original_name']}");
+        $this->logActivity($id, 'export_excel', "Экспорт в Excel: {$file->original_name}");
 
-        return $this->response->download($filename, null)->setFileName($file['name'] . '_export.xlsx');
+        return $this->response->download($filename, null)->setFileName($file->name . '_export.xlsx');
     }
 
     public function exportPdf(string $id): void
     {
+        /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
         if (!$file) {
             throw new Exception('Файл не найден');
         }
 
-        $rows = $this->fileRowModel->where('file_id', $id)
+        $rows = $this->fileRowModel
+            ->where('file_id', $file->id)
             ->orderBy('row_index', 'ASC')
             ->findAll();
 
         $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         $pdf->SetCreator('document Service');
         $pdf->SetAuthor('document Service');
-        $pdf->SetTitle($file['name']);
+        $pdf->SetTitle($file->name);
         $pdf->SetSubject('Export');
         $pdf->SetKeywords('Excel, PDF, Export');
 
@@ -329,12 +340,12 @@ class DocumentController extends BaseController
         $pdf->AddPage();
         $pdf->SetFont('dejavusans', '', 10);
 
-        $html = '<h1>' . htmlspecialchars($file['name']) . '</h1>';
-        $html .= '<p><strong>Дата создания:</strong> ' . $file['created_at'] . '</p>';
-        $html .= '<p><strong>Количество строк:</strong> ' . $file['row_count'] . '</p>';
+        $html = '<h1>' . htmlspecialchars($file->name) . '</h1>';
+        $html .= '<p><strong>Дата создания:</strong> ' . $file->created_at . '</p>';
+        $html .= '<p><strong>Количество строк:</strong> ' . $file->row_count . '</p>';
 
         if (!empty($rows)) {
-            $firstRow = json_decode($rows[0]['row_data'], true);
+            $firstRow = $rows[0]->row_data;
             $headers = array_keys($firstRow);
 
             $html .= '<table border="1" cellpadding="5" cellspacing="0">';
@@ -345,7 +356,7 @@ class DocumentController extends BaseController
             $html .= '</tr></thead><tbody>';
 
             foreach ($rows as $row) {
-                $rowData = json_decode($row['row_data'], true);
+                $rowData = $row->row_data;
                 $html .= '<tr>';
                 foreach ($headers as $header) {
                     $html .= '<td>' . htmlspecialchars($rowData[$header] ?? '') . '</td>';
@@ -357,9 +368,9 @@ class DocumentController extends BaseController
         }
 
         $pdf->writeHTML($html, true, false, true, false, '');
-        $pdf->Output($file['name'] . '_export.pdf', 'D');
+        $pdf->Output($file->name . '_export.pdf', 'D');
 
-        $this->logActivity($id, 'export_pdf', "Экспорт в PDF: {$file['original_name']}");
+        $this->logActivity($id, 'export_pdf', "Экспорт в PDF: {$file->original_name}");
     }
 
     protected function logActivity(string $fileId, string $action, string $description = '')

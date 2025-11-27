@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Entities\FileRowEntity;
+
 final class FileRowModel extends AbstractModel
 {
     protected $table = 'file_rows';
+    protected $returnType = FileRowEntity::class;
 
     protected $allowedFields = [
         'id',
