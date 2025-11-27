@@ -2,18 +2,24 @@
 <html lang="ru">
     <head>
         <meta charset="UTF-8">
-        <title><?= $title ?? 'Welcome to CodeIgniter 4!' ?></title>
+        <title><?= $this->renderSection('title') ?></title>
         <meta name="description" content="<?= $description ?? 'The small framework with powerful features' ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="shortcut icon" type="image/png" href="/favicon.ico">
-        <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/assets/global/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body>
 
-        <?= $content ?>
+        <?= $this->renderSection('content') ?>
 
-        <script src="/assets/jquery/jquery.min.js"></script>
-        <script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+
+        <script src="/assets/global/jquery/jquery.min.js"></script>
+        <script src="/assets/global/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script>
+            window.appConfig = { baseUrl: <?= json_encode(base_url()) ?> };
+        </script>
+        <?= $this->renderSection('scripts') ?>
     </body>
 </html>
 

@@ -1,68 +1,33 @@
-# CodeIgniter 4 Application Starter
+## Проверка окружения перед любыми операциями
+1. Убедиться что контейнер базы запущен: `docker ps`
+   Собрать если нет контейнера: `docker compose up -d db`
 
-## What is CodeIgniter?
+2. Проверить наличие нужной базы (по умолчанию `postgres`) внутри контейнера:
+   `docker exec postgres psql -U root -lqt | grep postgres`
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+3. При отсутствии базы создать её:
+   `docker exec postgres createdb -U root postgres`
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+## Создание новой миграции
+1. php spark make:migration NameMigration
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+2. Добавить `up()` и `down()`.
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+## Накатывание миграций в контейнерную БД
+1. Выполнить проверку окружения из раздела выше.
 
-## Installation & updates
+2. Запустить миграции в локальном PHP (установить pgsql/pdo_pgsql/intl):
+   `php spark migrate`
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+## Откат миграций
+1. Выполнить откат: `php spark migrate:rollback`
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+2. Для полного сброса можно использовать: `php spark migrate:refresh`.
 
-## Setup
+## Просмотр данных в базе контейнера
+1. Открыть psql в контейнере:
+  `docker exec -it postgres psql -U root -d postgres`
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+2. Вывод содержимого таблицы files:
+  `docker exec postgres psql -U root -d postgres -c "SELECT * FROM files LIMIT 10;"`
 
-## Important Change with index.php
-
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
-
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
-
-**Please** read the user guide for a better explanation of how CI4 works!
-
-## Repository Management
-
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
-
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
-
-## Server Requirements
-
-PHP version 8.1 or higher is required, with the following extensions installed:
-
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
-
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
-
-Additionally, make sure that the following extensions are enabled in your PHP:
-
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
