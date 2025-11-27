@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Entities\FileEntity;
 
-final class FileModel extends AbstractModel
+final class FileModelAbstract extends ModelAbstract
 {
     protected $table = 'files';
     protected $returnType = FileEntity::class;

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Entities\FileRowEntity;
 
-final class FileRowModel extends AbstractModel
+final class FileRowModelAbstract extends ModelAbstract
 {
     protected $table = 'file_rows';
     protected $returnType = FileRowEntity::class;

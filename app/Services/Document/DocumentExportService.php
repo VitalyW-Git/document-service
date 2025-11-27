@@ -4,8 +4,8 @@ namespace App\Services\Document;
 
 use App\Entities\FileEntity;
 use App\Entities\FileRowEntity;
-use App\Models\ActivityLogModel;
-use App\Models\FileRowModel;
+use App\Models\ActivityLogModelAbstract;
+use App\Models\FileRowModelAbstract;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use RuntimeException;
@@ -16,9 +16,9 @@ final class DocumentExportService
     private const TEMP_DIRECTORY = 'temp';
 
     public function __construct(
-        private readonly FileRowModel $fileRowModel,
-        private readonly ActivityLogModel $activityLogModel,
-        private readonly string $writePath
+        private readonly FileRowModelAbstract     $fileRowModel,
+        private readonly ActivityLogModelAbstract $activityLogModel,
+        private readonly string                   $writePath
     ) {
         $this->ensureTempDirectory();
     }

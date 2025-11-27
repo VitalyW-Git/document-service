@@ -4,7 +4,7 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-abstract class AbstractModel extends Model
+abstract class ModelAbstract extends Model
 {
     protected $primaryKey = 'id';
     protected $useAutoIncrement = false;

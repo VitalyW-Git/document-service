@@ -3,9 +3,9 @@
 namespace App\Controllers;
 
 use App\Entities\FileEntity;
-use App\Models\FileModel;
-use App\Models\FileRowModel;
-use App\Models\ActivityLogModel;
+use App\Models\FileModelAbstract;
+use App\Models\FileRowModelAbstract;
+use App\Models\ActivityLogModelAbstract;
 use App\Services\Document\DocumentExportService;
 use App\Services\Document\DocumentStorageService;
 use Exception;
@@ -17,9 +17,9 @@ class DocumentController extends BaseController
     protected DocumentExportService $exportService;
 
     public function __construct(
-        protected $fileModel = new FileModel(),
-        protected $fileRowModel = new FileRowModel(),
-        protected $activityLogModel = new ActivityLogModel(),
+        protected $fileModel = new FileModelAbstract(),
+        protected $fileRowModel = new FileRowModelAbstract(),
+        protected $activityLogModel = new ActivityLogModelAbstract(),
     )
     {
         $this->storageService = new DocumentStorageService(
@@ -39,15 +39,7 @@ class DocumentController extends BaseController
     public function index()
     {
         $page = $this->request->getGet('page') ?? 1;
-        $perPage = 10;
-
-        $files = $this->fileModel->orderBy('created_at', 'DESC')
-            ->paginate($perPage, 'default', $page);
-
-        $filesForView = array_map(
-            static fn (FileEntity $file) => $file->toArray(),
-            $files
-        );
+        $filesForView = $this->storageService->getFiles($page);
 
         return view('Document/index', [
             'files' => $filesForView,
@@ -95,9 +87,7 @@ class DocumentController extends BaseController
     public function getRows(string $id)
     {
         $page = $this->request->getGet('page') ?? 1;
-        $perPage = 5;
-
-        $rowsData = $this->storageService->paginateRows($id, $perPage, $page);
+        $rowsData = $this->storageService->paginateRows($id, $page);
 
         return $this->response->setJSON([
             'list' => $rowsData['rows'],
@@ -116,7 +106,6 @@ class DocumentController extends BaseController
                 'message' => 'Файл не найден'
             ]);
         }
-
         $fileRowId = $this->storageService->addRow($file, $this->request->getPost());
 
         return $this->response->setJSON([

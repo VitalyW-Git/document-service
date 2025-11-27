@@ -4,9 +4,9 @@ namespace App\Services\Document;
 
 use App\Entities\FileEntity;
 use App\Entities\FileRowEntity;
-use App\Models\ActivityLogModel;
-use App\Models\FileModel;
-use App\Models\FileRowModel;
+use App\Models\ActivityLogModelAbstract;
+use App\Models\FileModelAbstract;
+use App\Models\FileRowModelAbstract;
 use CodeIgniter\HTTP\Files\UploadedFile;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -15,12 +15,22 @@ use RuntimeException;
 final class DocumentStorageService
 {
     public function __construct(
-        private readonly FileModel $fileModel,
-        private readonly FileRowModel $fileRowModel,
-        private readonly ActivityLogModel $activityLogModel,
-        private readonly string $uploadPath
+        private readonly FileModelAbstract        $fileModel,
+        private readonly FileRowModelAbstract     $fileRowModel,
+        private readonly ActivityLogModelAbstract $activityLogModel,
+        private readonly string                   $uploadPath
     ) {
         $this->ensureUploadDirectory();
+    }
+
+    public function getFiles(int $page, int $perPage = 10): array
+    {
+        $files = $this->fileModel->orderBy('created_at', 'DESC')
+            ->paginate($perPage, 'default', $page);
+        return array_map(
+            static fn (FileEntity $file) => $file->toArray(),
+            $files
+        );
     }
 
     public function upload(UploadedFile $file): string
@@ -128,7 +138,7 @@ final class DocumentStorageService
     /**
      * @return array{rows: list<array<string,mixed>>, pager: \CodeIgniter\Pager\Pager}
      */
-    public function paginateRows(string $fileId, int $perPage, int $page): array
+    public function paginateRows(string $fileId, int $page, int $perPage = 5): array
     {
         $rows = $this->fileRowModel
             ->where('file_id', $fileId)

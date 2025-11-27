@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Entities\ActivityLogEntity;
 
-final class ActivityLogModel extends AbstractModel
+final class ActivityLogModelAbstract extends ModelAbstract
 {
     protected $table = 'activity_log';
     protected $returnType = ActivityLogEntity::class;
