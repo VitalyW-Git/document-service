@@ -17,7 +17,6 @@ class App extends BaseConfig
      *
      * E.g., http://example.com/
      */
-//    public string $baseURL = 'http://localhost:8080/';
     public string $baseURL = '';
 
     /**
@@ -206,7 +205,7 @@ class App extends BaseConfig
     {
         parent::__construct();
 
-        $base = env('app.baseURL', 'http://document.loc/');
+        $base = env('BASE_URL', 'http://localhost:8080/');
         $this->baseURL = rtrim($base, '/') . '/';
     }
 }
