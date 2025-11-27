@@ -31,3 +31,5 @@
 2. Вывод содержимого таблицы files:
   `docker exec postgres psql -U root -d postgres -c "SELECT * FROM files LIMIT 10;"`
 
+## Выборка данных с первого числа месяца, по последнее число месяца
+1. `php spark document:monthly-report`
