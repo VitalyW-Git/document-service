@@ -159,7 +159,7 @@ $(function () {
             formData[header] = $(`#addRowForm input[name="${header}"]`).val();
         });
 
-        api.createRow(fileId, formData)
+        api.addRow(fileId, formData)
             .done((response) => {
                 if (response?.success) {
                     bootstrap.Modal.getInstance(document.getElementById('addRowModal')).hide();

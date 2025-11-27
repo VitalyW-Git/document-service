@@ -14,7 +14,7 @@ window.documentApi = (function () {
         });
     }
 
-    function createRow(fileId, data) {
+    function addRow(fileId, data) {
         return $.ajax({
             url: buildUrl(`document/add-row/${fileId}`),
             type: 'POST',
@@ -54,7 +54,7 @@ window.documentApi = (function () {
 
     return {
         fetchRows,
-        createRow,
+        addRow,
         updateRow,
         deleteRow,
         uploadDocument,
