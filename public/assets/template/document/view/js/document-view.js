@@ -25,7 +25,7 @@ $(function () {
             .done((response) => {
                 if (response && !!response?.list) {
                     if (!defaultRowData.length) {
-                        defaultRowData = Object.keys(response.list[0].row_data || {});
+                        defaultRowData = Object.keys(response.list[0].rowData || {});
                         setupAddRowForm();
                         setupEditRowForm();
                     }
@@ -69,11 +69,11 @@ $(function () {
         list.forEach((item) => {
             html += '<tr>';
             defaultRowData.forEach((header) => {
-                const cellValue = item.row_data ? item.row_data[header] : '';
+                const cellValue = item.rowData ? item.rowData[header] : '';
                 html += `<td>${cellValue || ''}</td>`;
             });
             html += '<td>';
-            html += `<button class="btn btn-sm btn-warning edit-row" data-id="${item.id}" data-row='${JSON.stringify(item.row_data || {})}'>Редактировать</button> `;
+            html += `<button class="btn btn-sm btn-warning edit-row" data-id="${item.id}" data-row='${JSON.stringify(item.rowData)}'>Редактировать</button> `;
             html += `<button class="btn btn-sm btn-danger delete-row" data-id="${item.id}">Удалить</button>`;
             html += '</td></tr>';
         });

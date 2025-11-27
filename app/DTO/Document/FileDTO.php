@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTO\Document;
 
 use App\Entities\Document\FileEntity;
 

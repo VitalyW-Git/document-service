@@ -2,7 +2,7 @@
 
 namespace App\Entities\Document;
 
-interface DocumentFileInterface
+interface FileEntityInterface
 {
     public function getId(): string;
 

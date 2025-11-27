@@ -2,12 +2,12 @@
 
 namespace App\Services\Document\Export;
 
-use App\Entities\Document\DocumentFileInterface;
+use App\Entities\Document\FileEntityInterface;
 use TCPDF;
 
 final class PdfDocumentExporter extends AbstractDocumentExporter
 {
-    public function export(DocumentFileInterface $file): string
+    public function export(FileEntityInterface $file): string
     {
         $rows = $this->fetchRows($file->getId());
 

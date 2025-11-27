@@ -2,7 +2,8 @@
 
 namespace App\Services\Document;
 
-use App\DTO\FileDTO;
+use App\DTO\Document\FileDTO;
+use App\DTO\Document\FileRowDTO;
 use App\Entities\Document\FileEntity;
 use App\Entities\Document\FileRowEntity;
 use App\Models\Document\ActivityLogModel;
@@ -27,7 +28,7 @@ final class DocumentStorageService
     /**
      * @return array{files: list<FileDTO>, pager: Pager}
      */
-    public function paginateFiles(int $page, int $perPage = 10): array
+    public function getPaginateFiles(int $page, int $perPage = 10): array
     {
         $files = $this->fileModel
             ->orderBy('created_at', 'DESC')
@@ -36,6 +37,22 @@ final class DocumentStorageService
         return [
             'files' => array_map(fn (FileEntity $file) => new FileDTO($file), $files),
             'pager' => $this->fileModel->pager,
+        ];
+    }
+
+    /**
+     * @return array{rows: list<FileRowDTO>, pager: Pager}
+     */
+    public function getPaginateFileRows(string $fileId, int $page, int $perPage = 5): array
+    {
+        $fileRows = $this->fileRowModel
+            ->where('file_id', $fileId)
+            ->orderBy('row_index', 'ASC')
+            ->paginate($perPage, 'default', $page);
+
+        return [
+            'rows' => array_map(fn (FileRowEntity $fileRow) => new FileRowDTO($fileRow), $fileRows),
+            'pager' => $this->fileRowModel->pager,
         ];
     }
 
@@ -139,30 +156,6 @@ final class DocumentStorageService
         $this->fileRowModel->where('file_id', $file->id)->delete();
         $this->activityLogInsert($file->id, 'delete_file', "Удален файл: {$file->original_name}");
         $this->fileModel->delete($file->id);
-    }
-
-    /**
-     * @return array{rows: list<array<string,mixed>>, pager: \CodeIgniter\Pager\Pager}
-     */
-    public function paginateRows(string $fileId, int $page, int $perPage = 5): array
-    {
-        $rows = $this->fileRowModel
-            ->where('file_id', $fileId)
-            ->orderBy('row_index', 'ASC')
-            ->paginate($perPage, 'default', $page);
-
-        $decodedRows = array_map(
-            static fn (FileRowEntity $row): array => array_merge(
-                $row->toArray(),
-                ['row_data' => $row->row_data]
-            ),
-            $rows
-        );
-
-        return [
-            'rows' => $decodedRows,
-            'pager' => $this->fileRowModel->pager,
-        ];
     }
 
     private function fileRowInsert(string $fileId, array $headers, array $rows): void

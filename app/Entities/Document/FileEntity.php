@@ -13,7 +13,7 @@ use CodeIgniter\Entity\Entity;
  * @property string      $created_at
  * @property string      $updated_at
  */
-final class FileEntity extends Entity implements DocumentFileInterface
+final class FileEntity extends Entity implements FileEntityInterface
 {
     /** @var list<string> */
     protected $dates = ['created_at', 'updated_at'];

@@ -2,9 +2,9 @@
 
 namespace App\Services\Document\Export;
 
-use App\Entities\Document\DocumentFileInterface;
+use App\Entities\Document\FileEntityInterface;
 
 interface DocumentExporterInterface
 {
-    public function export(DocumentFileInterface $file): string;
+    public function export(FileEntityInterface $file): string;
 }

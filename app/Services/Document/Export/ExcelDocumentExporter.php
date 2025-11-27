@@ -2,13 +2,13 @@
 
 namespace App\Services\Document\Export;
 
-use App\Entities\Document\DocumentFileInterface;
+use App\Entities\Document\FileEntityInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 final class ExcelDocumentExporter extends AbstractDocumentExporter
 {
-    public function export(DocumentFileInterface $file): string
+    public function export(FileEntityInterface $file): string
     {
         $rows = $this->fetchRows($file->getId());
 

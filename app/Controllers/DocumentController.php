@@ -29,14 +29,13 @@ class DocumentController extends BaseController
 
     public function listFiles()
     {
-        $page = (int) ($this->request->getPost('page') ?? 1);
-        $page = max(1, $page);
-        $filesData = $this->storageService->paginateFiles($page);
+        $page = $this->request->getPost('page') ?? 1;
+        $paginateFiles = $this->storageService->getPaginateFiles($page);
 
         return $this->response->setJSON([
-            'list' => $filesData['files'],
-            'currentPage' => $filesData['pager']->getCurrentPage(),
-            'totalPages' => $filesData['pager']->getPageCount(),
+            'list' => $paginateFiles['files'],
+            'currentPage' => $paginateFiles['pager']->getCurrentPage(),
+            'totalPages' => $paginateFiles['pager']->getPageCount(),
         ]);
     }
 
@@ -80,12 +79,12 @@ class DocumentController extends BaseController
     public function getRows(string $id)
     {
         $page = $this->request->getGet('page') ?? 1;
-        $rowsData = $this->storageService->paginateRows($id, $page);
+        $paginateFileRows = $this->storageService->getPaginateFileRows($id, $page);
 
         return $this->response->setJSON([
-            'list' => $rowsData['rows'],
-            'currentPage' => $rowsData['pager']->getCurrentPage(),
-            'totalPages' => $rowsData['pager']->getPageCount(),
+            'list' => $paginateFileRows['rows'],
+            'currentPage' => $paginateFileRows['pager']->getCurrentPage(),
+            'totalPages' => $paginateFileRows['pager']->getPageCount(),
         ]);
     }
 
