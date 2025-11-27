@@ -2,8 +2,12 @@
 
 $(function () {
     const api = window.documentApi;
+    const tableRoot = document.getElementById('documentFileRoot');
+    if (!tableRoot) {
+        return;
+    }
 
-    $('#uploadForm').on('submit', function(e) {
+    $('#uploadForm').on('submit', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -19,7 +23,7 @@ $(function () {
         $('#uploadButton').prop('disabled', true).text('Загрузка...');
 
         api.uploadDocument(formData)
-            .done(function(response) {
+            .done(function (response) {
                 if (response.success) {
                     $message.html('<div class="alert alert-success">' + response.message + '</div>');
                     setTimeout(() => location.reload(), 1500);
@@ -27,13 +31,34 @@ $(function () {
                     $message.html('<div class="alert alert-danger">' + (response.message || 'Ошибка загрузки') + '</div>');
                 }
             })
-            .fail(function(xhr) {
+            .fail(function (xhr) {
                 console.error(xhr.responseText);
                 $message.html('<div class="alert alert-danger">Ошибка сервера.</div>');
             })
-            .always(function() {
+            .always(function () {
                 $('#uploadButton').prop('disabled', false).text('Загрузить');
             });
     });
-});
+    $(document).on('click', '.delete-file', function () {
+        const fileId = this.dataset.fileId;
+        if (!confirm('Вы уверены, что хотите удалить эту запись?')) {
+            return;
+        }
+        deleteFile(fileId);
+    });
 
+    function deleteFile(fileId) {
+        api.deleteFile(fileId)
+            .done((response) => {
+                if (response?.success) {
+                    showToast('Запись успешно удалена.');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert(response?.message || 'Не удалось удалить запись');
+                }
+            })
+            .fail(() => {
+                alert('Ошибка при удалении записи');
+            });
+    }
+});

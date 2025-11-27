@@ -130,8 +130,8 @@ final class DocumentStorageService
         }
 
         $this->fileRowModel->where('file_id', $file->id)->delete();
-        $this->fileModel->delete($file->id);
         $this->activityLogInsert($file->id, 'delete_file', "Удален файл: {$file->original_name}");
+        $this->fileModel->delete($file->id);
     }
 
     /**

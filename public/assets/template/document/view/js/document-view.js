@@ -1,6 +1,7 @@
 'use strict';
 
 $(function () {
+    console.log(5555)
     const root = document.getElementById('documentViewRoot');
     if (!root) {
         return;
@@ -211,6 +212,5 @@ $(function () {
                 alert('Ошибка при удалении строки');
             });
     }
-
 });
 

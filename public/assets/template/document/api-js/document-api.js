@@ -11,6 +11,7 @@ window.documentApi = (function () {
             type: 'GET',
             dataType: 'json',
             data: { page },
+            cache: false,
         });
     }
 
@@ -20,6 +21,7 @@ window.documentApi = (function () {
             type: 'POST',
             dataType: 'json',
             data,
+            cache: false,
         });
     }
 
@@ -29,6 +31,7 @@ window.documentApi = (function () {
             type: 'POST',
             dataType: 'json',
             data,
+            cache: false,
         });
     }
 
@@ -37,6 +40,16 @@ window.documentApi = (function () {
             url: buildUrl(`document/delete-row/${fileId}/${rowId}`),
             type: 'POST',
             dataType: 'json',
+            cache: false,
+        });
+    }
+
+    function deleteFile(fileId) {
+        return $.ajax({
+            url: buildUrl(`document/delete/${fileId}`),
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
         });
     }
 
@@ -54,6 +67,7 @@ window.documentApi = (function () {
 
     return {
         fetchRows,
+        deleteFile,
         addRow,
         updateRow,
         deleteRow,

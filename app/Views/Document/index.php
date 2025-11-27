@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card" id="documentFileRoot">
                 <div class="card-header">
                     <h5 class="mb-0">Список файлов</h5>
                 </div>
@@ -53,9 +53,9 @@
                                             <td><?= esc($file['updated_at']) ?></td>
                                             <td><?= esc($file['row_count']) ?></td>
                                             <td>
-                                                <a href="<?= base_url('view/' . $file['id']) ?>" class="btn btn-sm btn-info">Просмотр</a>
+                                                <a href="<?= base_url('view/' . $file['id']) ?>" class="btn btn-sm btn-primary">Просмотр</a>
                                                 <a href="<?= base_url('document/export-excel/' . $file['id']) ?>" class="btn btn-sm btn-success">Скачать</a>
-                                                <button class="btn btn-sm btn-danger delete-file" data-id="<?= $file['id'] ?>">Удалить</button>
+                                                <button class="btn btn-sm btn-danger delete-file" data-file-id="<?= $file['id'] ?>">Удалить</button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -77,6 +77,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-    <script src="/assets/template/document/api-js/document-api.js"></script>
-    <script src="/assets/template/document/main/js/document-main.js"></script>
+<script src="/assets/template/document/api-js/document-api.js"></script>
+<script src="/assets/shared/js/toast-container.js"></script>
+<script src="/assets/template/document/main/js/document-main.js"></script>
 <?= $this->endSection() ?>
