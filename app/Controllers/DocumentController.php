@@ -6,6 +6,7 @@ use App\Entities\Document\FileEntity;
 use App\Models\Document\FileModel;
 use App\Services\Document\DocumentExportService;
 use App\Services\Document\DocumentStorageService;
+use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
 use RuntimeException;
 
@@ -22,12 +23,12 @@ class DocumentController extends BaseController
         $this->exportService = service('documentExport');
     }
 
-    public function index()
+    public function index(): string
     {
         return view('Document/index');
     }
 
-    public function listFiles()
+    public function listFiles(): ResponseInterface
     {
         $page = $this->request->getPost('page') ?? 1;
         $paginateFiles = $this->storageService->getPaginateFiles($page);
@@ -39,44 +40,7 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function view($id)
-    {
-        /** @var FileEntity $file */
-        $file = $this->fileModel->find($id);
-        if (!$file) {
-            return redirect()->to('/Document')->with('error', 'Файл не найден');
-        }
-
-        return view('Document/view', ['file' => $file->toArray()]);
-    }
-
-    public function upload()
-    {
-        $file = $this->request->getFile('file');
-        if (!$file) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Файл не загружен'
-            ]);
-        }
-
-        try {
-            $fileId = $this->storageService->upload($file);
-
-            return $this->response->setJSON([
-                'success' => true,
-                'message' => 'Файл успешно загружен',
-                'file_id' => $fileId,
-            ]);
-        } catch (RuntimeException $exception) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => $exception->getMessage(),
-            ]);
-        }
-    }
-
-    public function getRows(string $id)
+    public function getRows(string $id): ResponseInterface
     {
         $page = $this->request->getGet('page') ?? 1;
         $paginateFileRows = $this->storageService->getPaginateFileRows($id, $page);
@@ -88,17 +52,53 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function addRow(string $id)
+    public function view($id): string|ResponseInterface
+    {
+        /** @var FileEntity $file */
+        $file = $this->fileModel->find($id);
+        if (!$file) {
+            return redirect()->to('/Document')->with('error', 'Файл не найден');
+        }
+
+        return view('Document/view', ['file' => $file->toArray()]);
+    }
+
+    public function upload(): ResponseInterface
+    {
+        $file = $this->request->getFile('file');
+        try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
+            $fileId = $this->storageService->upload($file);
+        } catch (RuntimeException $exception) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Файл успешно загружен',
+            'file_id' => $fileId,
+        ]);
+    }
+
+    public function addRow(string $id): ResponseInterface
     {
         /** @var FileEntity|null $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
+        try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
+            $fileRowId = $this->storageService->addRow($file, $this->request->getPost());
+        } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Файл не найден'
+                'message' => $exception->getMessage()
             ]);
         }
-        $fileRowId = $this->storageService->addRow($file, $this->request->getPost());
 
         return $this->response->setJSON([
             'success' => true,
@@ -107,17 +107,14 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function updateRow(string $id, string $rowId)
+    public function updateRow(string $id, string $rowId): ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Файл не найден'
-            ]);
-        }
         try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
             $this->storageService->updateRow($file, $rowId, $this->request->getPost());
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
@@ -132,18 +129,14 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function deleteRow(string $id, string $rowId)
+    public function deleteRow(string $id, string $rowId): ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Файл не найден'
-            ]);
-        }
-
         try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
             $this->storageService->deleteRow($file, $rowId);
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
@@ -158,18 +151,21 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function delete(string $id)
+    public function delete(string $id): ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
+        try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
+            $this->storageService->deleteFile($file);
+        } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Файл не найден'
+                'message' => $exception->getMessage()
             ]);
         }
-
-        $this->storageService->deleteFile($file);
 
         return $this->response->setJSON([
             'success' => true,
@@ -177,15 +173,14 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function exportExcel(string $id)
+    public function exportExcel(string $id): ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
-            throw new Exception('Файл не найден');
-        }
-
         try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
             $filePath = $this->exportService->exportExcel($file);
         } catch (RuntimeException $exception) {
             throw new Exception('Ошибка экспорта EXCEL: ' . $exception->getMessage());
@@ -194,15 +189,14 @@ class DocumentController extends BaseController
         return $this->response->download($filePath, null)->setFileName($file->getName() . '_export.xlsx');
     }
 
-    public function exportPdf(string $id)
+    public function exportPdf(string $id): ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);
-        if (!$file) {
-            throw new Exception('Файл не найден');
-        }
-
         try {
+            if (!$file) {
+                throw new Exception('Файл не найден');
+            }
             $filePath = $this->exportService->exportPdf($file);
         } catch (RuntimeException $exception) {
             throw new Exception('Ошибка экспорта PDF: ' . $exception->getMessage());
