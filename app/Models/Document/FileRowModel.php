@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Document;
 
-use App\Entities\FileRowEntity;
+use App\Entities\Document\FileRowEntity;
 
-final class FileRowModelAbstract extends ModelAbstract
+final class FileRowModel extends ModelAbstract
 {
     protected $table = 'file_rows';
     protected $returnType = FileRowEntity::class;

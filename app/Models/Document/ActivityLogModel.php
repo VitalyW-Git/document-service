@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Document;
 
-use App\Entities\ActivityLogEntity;
+use App\Entities\Document\ActivityLogEntity;
 
-final class ActivityLogModelAbstract extends ModelAbstract
+final class ActivityLogModel extends ModelAbstract
 {
     protected $table = 'activity_log';
     protected $returnType = ActivityLogEntity::class;

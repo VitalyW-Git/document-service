@@ -2,23 +2,22 @@
 
 namespace App\Services\Document;
 
-use App\Entities\FileEntity;
-use App\Entities\FileRowEntity;
-use App\Models\ActivityLogModelAbstract;
-use App\Models\FileModelAbstract;
-use App\Models\FileRowModelAbstract;
+use App\Entities\Document\FileEntity;
+use App\Entities\Document\FileRowEntity;
+use App\Models\Document\ActivityLogModel;
+use App\Models\Document\FileModel;
+use App\Models\Document\FileRowModel;
 use CodeIgniter\HTTP\Files\UploadedFile;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use RuntimeException;
 
 final class DocumentStorageService
 {
     public function __construct(
-        private readonly FileModelAbstract        $fileModel,
-        private readonly FileRowModelAbstract     $fileRowModel,
-        private readonly ActivityLogModelAbstract $activityLogModel,
-        private readonly string                   $uploadPath
+        private readonly FileModel $fileModel,
+        private readonly FileRowModel $fileRowModel,
+        private readonly ActivityLogModel $activityLogModel,
+        private readonly string $uploadPath
     ) {
         $this->ensureUploadDirectory();
     }
@@ -65,9 +64,9 @@ final class DocumentStorageService
             ]);
 
             $headers = array_shift($rows) ?? [];
-            $this->persistRows((string) $fileId, $headers, $rows);
+            $this->fileRowInsert((string) $fileId, $headers, $rows);
 
-            $this->logActivity((string) $fileId, 'upload', "Загружен файл: {$originalName}");
+            $this->activityLogInsert((string) $fileId, 'upload', "Загружен файл: {$originalName}");
 
             return (string) $fileId;
         } catch (\Throwable $exception) {
@@ -96,7 +95,7 @@ final class DocumentStorageService
         ]);
 
         $this->fileModel->update($file->id, ['row_count' => ($file->row_count ?? 0) + 1]);
-        $this->logActivity($file->id, 'add_row', "Добавлена строка #{$newIndex}");
+        $this->activityLogInsert($file->id, 'add_row', "Добавлена строка #{$newIndex}");
 
         return (string) $fileRowId;
     }
@@ -109,7 +108,7 @@ final class DocumentStorageService
             'row_data' => json_encode($rowData, JSON_UNESCAPED_UNICODE),
         ]);
 
-        $this->logActivity($file->id, 'update_row', "Обновлена строка #{$fileRow->row_index}");
+        $this->activityLogInsert($file->id, 'update_row', "Обновлена строка #{$fileRow->row_index}");
     }
 
     public function deleteRow(FileEntity $file, string $rowId): void
@@ -121,7 +120,7 @@ final class DocumentStorageService
         $updatedCount = max(0, ($file->row_count ?? 0) - 1);
         $this->fileModel->update($file->id, ['row_count' => $updatedCount]);
 
-        $this->logActivity($file->id, 'delete_row', "Удалена строка #{$fileRow->row_index}");
+        $this->activityLogInsert($file->id, 'delete_row', "Удалена строка #{$fileRow->row_index}");
     }
 
     public function deleteFile(FileEntity $file): void
@@ -132,7 +131,7 @@ final class DocumentStorageService
 
         $this->fileRowModel->where('file_id', $file->id)->delete();
         $this->fileModel->delete($file->id);
-        $this->logActivity($file->id, 'delete_file', "Удален файл: {$file->original_name}");
+        $this->activityLogInsert($file->id, 'delete_file', "Удален файл: {$file->original_name}");
     }
 
     /**
@@ -159,7 +158,7 @@ final class DocumentStorageService
         ];
     }
 
-    private function persistRows(string $fileId, array $headers, array $rows): void
+    private function fileRowInsert(string $fileId, array $headers, array $rows): void
     {
         foreach ($rows as $index => $row) {
             $rowData = [];
@@ -187,7 +186,7 @@ final class DocumentStorageService
         return $fileRow;
     }
 
-    private function logActivity(string $fileId, string $action, string $description = ''): void
+    private function activityLogInsert(string $fileId, string $action, string $description = ''): void
     {
         $this->activityLogModel->insert([
             'file_id' => $fileId,

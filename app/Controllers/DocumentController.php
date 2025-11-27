@@ -2,10 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Entities\FileEntity;
-use App\Models\FileModelAbstract;
-use App\Models\FileRowModelAbstract;
-use App\Models\ActivityLogModelAbstract;
+use App\Entities\Document\FileEntity;
+use App\Models\Document\FileModel;
 use App\Services\Document\DocumentExportService;
 use App\Services\Document\DocumentStorageService;
 use Exception;
@@ -15,25 +13,13 @@ class DocumentController extends BaseController
 {
     protected DocumentStorageService $storageService;
     protected DocumentExportService $exportService;
+    protected FileModel $fileModel;
 
-    public function __construct(
-        protected $fileModel = new FileModelAbstract(),
-        protected $fileRowModel = new FileRowModelAbstract(),
-        protected $activityLogModel = new ActivityLogModelAbstract(),
-    )
+    public function __construct()
     {
-        $this->storageService = new DocumentStorageService(
-            $this->fileModel,
-            $this->fileRowModel,
-            $this->activityLogModel,
-            WRITEPATH . 'uploads' . DIRECTORY_SEPARATOR
-        );
-
-        $this->exportService = new DocumentExportService(
-            $this->fileRowModel,
-            $this->activityLogModel,
-            WRITEPATH
-        );
+        $this->fileModel = new FileModel();
+        $this->storageService = service('documentStorage');
+        $this->exportService = service('documentExport');
     }
 
     public function index()
@@ -199,7 +185,7 @@ class DocumentController extends BaseController
             throw new Exception('Ошибка экспорта EXCEL: ' . $exception->getMessage());
         }
 
-        return $this->response->download($filePath, null)->setFileName($file->name . '_export.xlsx');
+        return $this->response->download($filePath, null)->setFileName($file->getName() . '_export.xlsx');
     }
 
     public function exportPdf(string $id)
@@ -216,7 +202,7 @@ class DocumentController extends BaseController
             throw new Exception('Ошибка экспорта PDF: ' . $exception->getMessage());
         }
 
-        return $this->response->download($filePath, null)->setFileName($file->name . '_export.pdf');
+        return $this->response->download($filePath, null)->setFileName($file->getName() . '_export.pdf');
     }
 }
 

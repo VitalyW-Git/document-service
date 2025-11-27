@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Document;
 
-use App\Entities\FileEntity;
+use App\Entities\Document\FileEntity;
 
-final class FileModelAbstract extends ModelAbstract
+final class FileModel extends ModelAbstract
 {
     protected $table = 'files';
     protected $returnType = FileEntity::class;

@@ -2,6 +2,13 @@
 
 namespace Config;
 
+use App\Models\Document\ActivityLogModel;
+use App\Models\Document\FileModel;
+use App\Models\Document\FileRowModel;
+use App\Services\Document\DocumentExportService;
+use App\Services\Document\DocumentStorageService;
+use App\Services\Document\Export\ExcelDocumentExporter;
+use App\Services\Document\Export\PdfDocumentExporter;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -19,14 +26,41 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    public static function documentStorage(bool $getShared = true): DocumentStorageService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('documentStorage');
+        }
+
+        return new DocumentStorageService(
+            new FileModel(),
+            new FileRowModel(),
+            new ActivityLogModel(),
+            WRITEPATH . 'uploads' . DIRECTORY_SEPARATOR,
+        );
+    }
+
+    public static function documentExport(bool $getShared = true): DocumentExportService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('documentExport');
+        }
+
+        $fileRowModel = new FileRowModel();
+        $activityLogModel = new ActivityLogModel();
+
+        $excelExporter = new ExcelDocumentExporter(
+            $fileRowModel,
+            $activityLogModel,
+            WRITEPATH
+        );
+
+        $pdfExporter = new PdfDocumentExporter(
+            $fileRowModel,
+            $activityLogModel,
+            WRITEPATH
+        );
+
+        return new DocumentExportService($excelExporter, $pdfExporter);
+    }
 }
