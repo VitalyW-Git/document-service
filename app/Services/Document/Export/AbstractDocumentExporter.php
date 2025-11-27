@@ -49,7 +49,7 @@ abstract class AbstractDocumentExporter implements DocumentExporterInterface
     {
         $path = rtrim($this->writePath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'temp';
 
-        if (!is_dir($path) && !mkdir($path, 0755, true) && !is_dir($path)) {
+        if (!is_dir($path) && !mkdir($path, 0755, true)) {
             throw new RuntimeException('Не удалось создать временную директорию для экспорта');
         }
     }
