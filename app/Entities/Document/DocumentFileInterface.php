@@ -10,7 +10,9 @@ interface DocumentFileInterface
 
     public function getOriginalName(): string;
 
-    public function getRowCount(): ?int;
+    public function getRowCount(): int;
 
-    public function getCreatedAt(): ?string;
+    public function getCreatedAt(): string;
+
+    public function getUpdatedAt(): string;
 }

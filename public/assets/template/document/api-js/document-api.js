@@ -15,6 +15,16 @@ window.documentApi = (function () {
         });
     }
 
+    function fetchFiles(page) {
+        return $.ajax({
+            url: buildUrl('document/list-files'),
+            type: 'POST',
+            dataType: 'json',
+            data: { page },
+            cache: false,
+        });
+    }
+
     function addRow(fileId, data) {
         return $.ajax({
             url: buildUrl(`document/add-row/${fileId}`),
@@ -72,6 +82,7 @@ window.documentApi = (function () {
         updateRow,
         deleteRow,
         uploadDocument,
+        fetchFiles,
     };
 })();
 

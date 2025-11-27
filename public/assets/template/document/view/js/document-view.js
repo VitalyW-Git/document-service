@@ -23,7 +23,7 @@ $(function () {
         currentPage = page;
         api.fetchRows(fileId, page)
             .done((response) => {
-                if (response && Array.isArray(response.list) && response.list.length) {
+                if (response && !!response?.list) {
                     if (!defaultRowData.length) {
                         defaultRowData = Object.keys(response.list[0].row_data || {});
                         setupAddRowForm();
@@ -42,12 +42,7 @@ $(function () {
     }
 
     function drawTable(list) {
-        if (!list.length) {
-            $('#rowsContainer').html('<p class="text-center">Нет данных</p>');
-            return;
-        }
-
-        let html = builderElementTable(list);
+        const html = builderElementTable(list);
         $('#rowsContainer').html(html);
 
         $('.edit-row').on('click', function () {

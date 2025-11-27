@@ -2,12 +2,14 @@
 
 namespace App\Services\Document;
 
+use App\DTO\FileDTO;
 use App\Entities\Document\FileEntity;
 use App\Entities\Document\FileRowEntity;
 use App\Models\Document\ActivityLogModel;
 use App\Models\Document\FileModel;
 use App\Models\Document\FileRowModel;
 use CodeIgniter\HTTP\Files\UploadedFile;
+use CodeIgniter\Pager\Pager;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use RuntimeException;
 
@@ -22,14 +24,19 @@ final class DocumentStorageService
         $this->ensureUploadDirectory();
     }
 
-    public function getFiles(int $page, int $perPage = 10): array
+    /**
+     * @return array{files: list<FileDTO>, pager: Pager}
+     */
+    public function paginateFiles(int $page, int $perPage = 10): array
     {
-        $files = $this->fileModel->orderBy('created_at', 'DESC')
+        $files = $this->fileModel
+            ->orderBy('created_at', 'DESC')
             ->paginate($perPage, 'default', $page);
-        return array_map(
-            static fn (FileEntity $file) => $file->toArray(),
-            $files
-        );
+
+        return [
+            'files' => array_map(fn (FileEntity $file) => new FileDTO($file), $files),
+            'pager' => $this->fileModel->pager,
+        ];
     }
 
     public function upload(UploadedFile $file): string

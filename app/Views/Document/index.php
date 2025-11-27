@@ -29,46 +29,10 @@
                     <h5 class="mb-0">Список файлов</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Имя</th>
-                                    <th>Дата создания</th>
-                                    <th>Дата изменения</th>
-                                    <th>Количество строк</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($files)): ?>
-                                    <tr>
-                                        <td colspan="5" class="text-center">Нет загруженных файлов</td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($files as $file): ?>
-                                        <tr>
-                                            <td><?= esc($file['name']) ?></td>
-                                            <td><?= esc($file['created_at']) ?></td>
-                                            <td><?= esc($file['updated_at']) ?></td>
-                                            <td><?= esc($file['row_count']) ?></td>
-                                            <td>
-                                                <a href="<?= base_url('view/' . $file['id']) ?>" class="btn btn-sm btn-primary">Просмотр</a>
-                                                <a href="<?= base_url('document/export-excel/' . $file['id']) ?>" class="btn btn-sm btn-success">Скачать</a>
-                                                <button class="btn btn-sm btn-danger delete-file" data-file-id="<?= $file['id'] ?>">Удалить</button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                    <div class="table-responsive" id="filesContainer">
+                        <div class="text-center py-4">Список загружается...</div>
                     </div>
-                    
-                    <?php if (isset($pager)): ?>
-                        <nav aria-label="Page navigation">
-                            <?= $pager->links('default') ?>
-                        </nav>
-                    <?php endif; ?>
+                    <div id="paginationFilesContainer" class="mt-3"></div>
                 </div>
             </div>
         </div>

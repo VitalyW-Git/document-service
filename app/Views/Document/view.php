@@ -41,16 +41,10 @@
                     </button>
                 </div>
                 <div class="card-body">
-                    <div id="rowsContainer">
-                        <div class="text-center">
-                            <div class="spinner-border" role="status">
-                                <span class="visually-hidden">Загрузка...</span>
-                            </div>
-                        </div>
+                    <div class="table-responsive" id="rowsContainer">
+                        <div class="text-center py-4">Список загружается...</div>
                     </div>
-
-                    <nav aria-label="Page navigation" id="paginationContainer" class="mt-3">
-                    </nav>
+                    <div id="paginationContainer" class="mt-3"></div>
                 </div>
             </div>
         </div>

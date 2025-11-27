@@ -24,12 +24,19 @@ class DocumentController extends BaseController
 
     public function index()
     {
-        $page = $this->request->getGet('page') ?? 1;
-        $filesForView = $this->storageService->getFiles($page);
+        return view('Document/index');
+    }
 
-        return view('Document/index', [
-            'files' => $filesForView,
-            'pager' => $this->fileModel->pager,
+    public function listFiles()
+    {
+        $page = (int) ($this->request->getPost('page') ?? 1);
+        $page = max(1, $page);
+        $filesData = $this->storageService->paginateFiles($page);
+
+        return $this->response->setJSON([
+            'list' => $filesData['files'],
+            'currentPage' => $filesData['pager']->getCurrentPage(),
+            'totalPages' => $filesData['pager']->getPageCount(),
         ]);
     }
 

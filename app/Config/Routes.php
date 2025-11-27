@@ -16,6 +16,7 @@ $routes->group('document', function($routes) {
     $routes->post('update-row/(:segment)/(:segment)', 'DocumentController::updateRow/$1/$2');
     $routes->post('upload', 'DocumentController::upload');
     $routes->post('delete-row/(:segment)/(:segment)', 'DocumentController::deleteRow/$1/$2');
+    $routes->post('list-files', 'DocumentController::listFiles');
     $routes->post('delete/(:segment)', 'DocumentController::delete/$1');
     $routes->get('export-excel/(:segment)', 'DocumentController::exportExcel/$1');
     $routes->get('export-pdf/(:segment)', 'DocumentController::exportPdf/$1');
