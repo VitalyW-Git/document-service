@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "97d671698a9e07c1c8167a7e1dddd23d",
+    "content-hash": "887f5f316e7b9dddb8abb288a1303ed3",
     "packages": [
         {
             "name": "box/spout",
@@ -83,16 +83,16 @@
         },
         {
             "name": "codeigniter4/codeigniter4",
-            "version": "dev-develop",
+            "version": "v4.6.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/codeigniter4/CodeIgniter4.git",
-                "reference": "92100b2635e32bfb502bce40d62ef0e1a982d980"
+                "reference": "ec20327cb70fb6bdd78733f60ac7cc45faa98a67"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/codeigniter4/CodeIgniter4/zipball/92100b2635e32bfb502bce40d62ef0e1a982d980",
-                "reference": "92100b2635e32bfb502bce40d62ef0e1a982d980",
+                "url": "https://api.github.com/repos/codeigniter4/CodeIgniter4/zipball/ec20327cb70fb6bdd78733f60ac7cc45faa98a67",
+                "reference": "ec20327cb70fb6bdd78733f60ac7cc45faa98a67",
                 "shasum": ""
             },
             "require": {
@@ -108,7 +108,7 @@
             "require-dev": {
                 "codeigniter/phpstan-codeigniter": "1.x-dev",
                 "fakerphp/faker": "^1.24",
-                "kint-php/kint": "^6.1",
+                "kint-php/kint": "^6.0",
                 "mikey179/vfsstream": "^1.6.12",
                 "nexusphp/tachycardia": "^2.0",
                 "phpstan/extension-installer": "^1.4",
@@ -117,7 +117,7 @@
                 "phpunit/phpcov": "^9.0.2 || ^10.0",
                 "phpunit/phpunit": "^10.5.16 || ^11.2",
                 "predis/predis": "^3.0",
-                "rector/rector": "2.2.8",
+                "rector/rector": "2.1.2",
                 "shipmonk/phpstan-baseline-per-identifier": "^2.0"
             },
             "suggest": {
@@ -141,7 +141,6 @@
                 "ext-sqlsrv": "If you use SQL Server",
                 "ext-xdebug": "If you use CIUnitTestCase::assertHeaderEmitted()"
             },
-            "default-branch": true,
             "type": "project",
             "extra": {
                 "branch-alias": {
@@ -223,7 +222,7 @@
                 "slack": "https://codeigniterchat.slack.com",
                 "issues": "https://github.com/codeigniter4/CodeIgniter4/issues"
             },
-            "time": "2025-11-23T09:25:15+00:00"
+            "time": "2025-08-02T13:33:41+00:00"
         },
         {
             "name": "composer/pcre",
@@ -2896,9 +2895,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "codeigniter4/codeigniter4": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

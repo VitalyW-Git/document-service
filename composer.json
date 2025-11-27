@@ -11,7 +11,7 @@
     },
     "require": {
         "php": "^8.1",
-        "codeigniter4/codeigniter4": "dev-develop",
+        "codeigniter4/codeigniter4": "^4.0",
         "phpoffice/phpspreadsheet": "^2.0",
         "tecnickcom/tcpdf": "^6.6",
         "box/spout": "^3.3"

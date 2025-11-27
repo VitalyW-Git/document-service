@@ -11,7 +11,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use TCPDF;
 
-class Document extends BaseController
+class DocumentController extends BaseController
 {
     protected FileModel $fileModel;
     protected FileRowModel $fileRowModel;
@@ -35,12 +35,10 @@ class Document extends BaseController
         $files = $this->fileModel->orderBy('created_at', 'DESC')
             ->paginate($perPage, 'default', $page);
 
-        $data = [
+        return view('Document/index', [
             'files' => $files,
             'pager' => $this->fileModel->pager,
-        ];
-
-        return view('Document/index', $data);
+        ]);
     }
 
     public function view($id)
@@ -54,7 +52,7 @@ class Document extends BaseController
             'file' => $file,
         ];
 
-        return view('Document/view', $data);
+        return view('Document/view', ['file' => $file]);
     }
 
     
@@ -184,13 +182,9 @@ class Document extends BaseController
 
     public function updateRow(string $id, string $rowId)
     {
-        $file = $this->fileModel->find($id);
-        if (!$file) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Файл не найден']);
-        }
-
+        /** @var FileRowModel $rowModel */
         $rowModel = $this->fileRowModel->find($rowId);
-        if (!$rowModel || $rowModel['file_id'] != $id) {
+        if (!$rowModel) {
             return $this->response->setJSON(['success' => false, 'message' => 'Строка не найдена']);
         }
 
