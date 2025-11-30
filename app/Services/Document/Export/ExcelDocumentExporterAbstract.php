@@ -6,7 +6,7 @@ use App\Entities\Document\FileEntityInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-final class ExcelDocumentExporter extends AbstractDocumentExporter
+abstract class ExcelDocumentExporterAbstract extends DocumentAbstract implements DocumentExporterInterface
 {
     public function export(FileEntityInterface $file): string
     {

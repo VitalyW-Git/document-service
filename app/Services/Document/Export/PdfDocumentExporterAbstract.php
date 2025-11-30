@@ -5,7 +5,7 @@ namespace App\Services\Document\Export;
 use App\Entities\Document\FileEntityInterface;
 use TCPDF;
 
-final class PdfDocumentExporter extends AbstractDocumentExporter
+abstract class PdfDocumentExporterAbstract extends DocumentAbstract implements DocumentExporterInterface
 {
     public function export(FileEntityInterface $file): string
     {

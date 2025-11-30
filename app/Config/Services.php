@@ -7,8 +7,10 @@ use App\Models\Document\FileModel;
 use App\Models\Document\FileRowModel;
 use App\Services\Document\DocumentExportService;
 use App\Services\Document\DocumentStorageService;
-use App\Services\Document\Export\ExcelDocumentExporter;
-use App\Services\Document\Export\PdfDocumentExporter;
+use App\Services\Document\Export\ExcelDocument;
+use App\Services\Document\Export\ExcelDocumentExporterAbstract;
+use App\Services\Document\Export\PdfDocument;
+use App\Services\Document\Export\PdfDocumentExporterAbstract;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -49,13 +51,13 @@ class Services extends BaseService
         $fileRowModel = new FileRowModel();
         $activityLogModel = new ActivityLogModel();
 
-        $excelExporter = new ExcelDocumentExporter(
+        $excelExporter = new ExcelDocument(
             $fileRowModel,
             $activityLogModel,
             WRITEPATH
         );
 
-        $pdfExporter = new PdfDocumentExporter(
+        $pdfExporter = new PdfDocument(
             $fileRowModel,
             $activityLogModel,
             WRITEPATH
