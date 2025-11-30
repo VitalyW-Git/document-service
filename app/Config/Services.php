@@ -6,11 +6,9 @@ use App\Models\Document\ActivityLogModel;
 use App\Models\Document\FileModel;
 use App\Models\Document\FileRowModel;
 use App\Services\Document\DocumentExportService;
-use App\Services\Document\DocumentStorageService;
+use App\Services\Document\DocumentService;
 use App\Services\Document\Export\ExcelDocument;
-use App\Services\Document\Export\ExcelDocumentExporterAbstract;
 use App\Services\Document\Export\PdfDocument;
-use App\Services\Document\Export\PdfDocumentExporterAbstract;
 use CodeIgniter\Config\BaseService;
 
 /**
@@ -28,13 +26,13 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    public static function documentStorage(bool $getShared = true): DocumentStorageService
+    public static function documentService(bool $getShared = true): DocumentService
     {
         if ($getShared) {
-            return static::getSharedInstance('documentStorage');
+            return static::getSharedInstance('documentService');
         }
 
-        return new DocumentStorageService(
+        return new DocumentService(
             new FileModel(),
             new FileRowModel(),
             new ActivityLogModel(),
@@ -42,10 +40,10 @@ class Services extends BaseService
         );
     }
 
-    public static function documentExport(bool $getShared = true): DocumentExportService
+    public static function documentExportService(bool $getShared = true): DocumentExportService
     {
         if ($getShared) {
-            return static::getSharedInstance('documentExport');
+            return static::getSharedInstance('documentExportService');
         }
 
         $fileRowModel = new FileRowModel();

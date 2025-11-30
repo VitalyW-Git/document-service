@@ -14,7 +14,7 @@ use CodeIgniter\Pager\Pager;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use RuntimeException;
 
-final class DocumentStorageService
+final class DocumentService
 {
     public function __construct(
         private readonly FileModel $fileModel,

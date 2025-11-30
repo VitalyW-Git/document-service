@@ -5,22 +5,22 @@ namespace App\Controllers;
 use App\Entities\Document\FileEntity;
 use App\Models\Document\FileModel;
 use App\Services\Document\DocumentExportService;
-use App\Services\Document\DocumentStorageService;
+use App\Services\Document\DocumentService;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
 use RuntimeException;
 
 class DocumentController extends BaseController
 {
-    protected DocumentStorageService $storageService;
-    protected DocumentExportService $exportService;
+    protected DocumentService $documentService;
+    protected DocumentExportService $documentExportService;
     protected FileModel $fileModel;
 
     public function __construct()
     {
         $this->fileModel = new FileModel();
-        $this->storageService = service('documentStorage');
-        $this->exportService = service('documentExport');
+        $this->documentService = service('documentService');
+        $this->documentExportService = service('documentExportService');
     }
 
     public function index(): string
@@ -31,7 +31,7 @@ class DocumentController extends BaseController
     public function listFiles(): ResponseInterface
     {
         $page = $this->request->getPost('page') ?? 1;
-        $paginateFiles = $this->storageService->getPaginateFiles($page);
+        $paginateFiles = $this->documentService->getPaginateFiles($page);
 
         return $this->response->setJSON([
             'list' => $paginateFiles['files'],
@@ -43,7 +43,7 @@ class DocumentController extends BaseController
     public function getRows(string $id): ResponseInterface
     {
         $page = $this->request->getGet('page') ?? 1;
-        $paginateFileRows = $this->storageService->getPaginateFileRows($id, $page);
+        $paginateFileRows = $this->documentService->getPaginateFileRows($id, $page);
 
         return $this->response->setJSON([
             'list' => $paginateFileRows['rows'],
@@ -70,7 +70,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $fileId = $this->storageService->upload($file);
+            $fileId = $this->documentService->upload($file);
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
@@ -92,7 +92,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $fileRowId = $this->storageService->addRow($file, $this->request->getPost());
+            $fileRowId = $this->documentService->addRow($file, $this->request->getPost());
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
@@ -115,7 +115,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $this->storageService->updateRow($file, $rowId, $this->request->getPost());
+            $this->documentService->updateRow($file, $rowId, $this->request->getPost());
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
@@ -137,7 +137,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $this->storageService->deleteRow($file, $rowId);
+            $this->documentService->deleteRow($file, $rowId);
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
@@ -159,7 +159,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $this->storageService->deleteFile($file);
+            $this->documentService->deleteFile($file);
         } catch (RuntimeException $exception) {
             return $this->response->setJSON([
                 'success' => false,
@@ -181,7 +181,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $filePath = $this->exportService->exportExcel($file);
+            $filePath = $this->documentExportService->exportExcel($file);
         } catch (RuntimeException $exception) {
             throw new Exception('Ошибка экспорта EXCEL: ' . $exception->getMessage());
         }
@@ -197,7 +197,7 @@ class DocumentController extends BaseController
             if (!$file) {
                 throw new Exception('Файл не найден');
             }
-            $filePath = $this->exportService->exportPdf($file);
+            $filePath = $this->documentExportService->exportPdf($file);
         } catch (RuntimeException $exception) {
             throw new Exception('Ошибка экспорта PDF: ' . $exception->getMessage());
         }
