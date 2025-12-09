@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Document;
 
-use App\Entities\Document\FileRowEntity;
+use App\Entities\Document\FileRowEntityInterface;
 
 class FileRowDTO
 {
@@ -11,7 +13,7 @@ class FileRowDTO
     public array $rowData;
 
     public function __construct(
-        FileRowEntity $fileRow
+        FileRowEntityInterface $fileRow
     )
     {
         $this->id = $fileRow->getId();

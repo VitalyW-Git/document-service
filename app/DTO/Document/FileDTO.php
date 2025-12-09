@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO\Document;
 
-use App\Entities\Document\FileEntity;
+use App\Entities\Document\FileEntityInterface;
 
 class FileDTO
 {
     public string $id;
     public string $name;
-    public string $rowCount;
+    public int $rowCount;
     public string $createdAt;
     public string $updatedAt;
 
     public function __construct(
-        FileEntity $file
+        FileEntityInterface $file
     )
     {
         $this->id = $file->getId();

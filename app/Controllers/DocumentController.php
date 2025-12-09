@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Entities\Document\FileEntity;
@@ -8,7 +10,6 @@ use App\Services\Document\DocumentExportService;
 use App\Services\Document\DocumentService;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
-use RuntimeException;
 use Throwable;
 
 class DocumentController extends BaseController
@@ -31,7 +32,7 @@ class DocumentController extends BaseController
 
     public function listFiles(): ResponseInterface
     {
-        $page = $this->request->getPost('page') ?? 1;
+        $page = (int) $this->request->getPost('page') ?? 1;
         $paginateFiles = $this->documentService->getPaginateFiles($page);
 
         return $this->response->setJSON([
@@ -43,7 +44,7 @@ class DocumentController extends BaseController
 
     public function getRows(string $id): ResponseInterface
     {
-        $page = $this->request->getGet('page') ?? 1;
+        $page = (int) $this->request->getGet('page') ?? 1;
         $paginateFileRows = $this->documentService->getPaginateFileRows($id, $page);
 
         return $this->response->setJSON([
@@ -53,7 +54,7 @@ class DocumentController extends BaseController
         ]);
     }
 
-    public function view($id): string|ResponseInterface
+    public function view(string $id): string|ResponseInterface
     {
         /** @var FileEntity $file */
         $file = $this->fileModel->find($id);

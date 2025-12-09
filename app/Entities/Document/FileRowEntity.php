@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entities\Document;
 
 use CodeIgniter\Entity\Entity;
@@ -40,7 +42,7 @@ final class FileRowEntity extends Entity implements FileRowEntityInterface
 
     public function getRowIndex(): int
     {
-        return $this->attributes['row_index'];
+        return (int) $this->attributes['row_index'];
     }
 
     public function getCreatedAt(): string

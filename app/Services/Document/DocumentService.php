@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Document;
 
 use App\DTO\Document\FileDTO;
 use App\DTO\Document\FileRowDTO;
 use App\Entities\Document\FileEntity;
+use App\Entities\Document\FileEntityInterface;
 use App\Entities\Document\FileRowEntity;
+use App\Entities\Document\FileRowEntityInterface;
 use App\Models\Document\ActivityLogModel;
 use App\Models\Document\FileModel;
 use App\Models\Document\FileRowModel;
@@ -35,7 +39,7 @@ final class DocumentService
             ->paginate($perPage, 'default', $page);
 
         return [
-            'files' => array_map(fn (FileEntity $file) => new FileDTO($file), $files),
+            'files' => array_map(fn (FileEntityInterface $file) => new FileDTO($file), $files),
             'pager' => $this->fileModel->pager,
         ];
     }
@@ -51,7 +55,7 @@ final class DocumentService
             ->paginate($perPage, 'default', $page);
 
         return [
-            'rows' => array_map(fn (FileRowEntity $fileRow) => new FileRowDTO($fileRow), $fileRows),
+            'rows' => array_map(fn (FileRowEntityInterface $fileRow) => new FileRowDTO($fileRow), $fileRows),
             'pager' => $this->fileRowModel->pager,
         ];
     }

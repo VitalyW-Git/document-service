@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Document\Export;
 
 use App\Entities\Document\FileEntityInterface;
@@ -42,7 +44,7 @@ abstract class PdfDocumentExporterAbstract extends DocumentAbstract implements D
             $html .= '<table border="1" cellpadding="5" cellspacing="0">';
             $html .= '<thead><tr>';
             foreach ($headers as $header) {
-                $html .= '<th><strong>' . htmlspecialchars($header) . '</strong></th>';
+                $html .= '<th><strong>' . htmlspecialchars((string) $header ?? '') . '</strong></th>';
             }
             $html .= '</tr></thead><tbody>';
 
@@ -50,7 +52,8 @@ abstract class PdfDocumentExporterAbstract extends DocumentAbstract implements D
                 $rowData = $row->row_data;
                 $html .= '<tr>';
                 foreach ($headers as $header) {
-                    $html .= '<td>' . htmlspecialchars($rowData[$header] ?? '') . '</td>';
+                    $value = $rowData[$header] ?? '';
+                    $html .= '<td>' . htmlspecialchars((string) $value) . '</td>';
                 }
                 $html .= '</tr>';
             }
