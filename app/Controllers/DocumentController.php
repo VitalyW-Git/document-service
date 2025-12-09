@@ -9,6 +9,7 @@ use App\Services\Document\DocumentService;
 use CodeIgniter\HTTP\ResponseInterface;
 use Exception;
 use RuntimeException;
+use Throwable;
 
 class DocumentController extends BaseController
 {
@@ -71,7 +72,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $fileId = $this->documentService->upload($file);
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $exception->getMessage(),
@@ -93,7 +94,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $fileRowId = $this->documentService->addRow($file, $this->request->getPost());
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $exception->getMessage()
@@ -116,7 +117,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $this->documentService->updateRow($file, $rowId, $this->request->getPost());
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $exception->getMessage()
@@ -138,7 +139,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $this->documentService->deleteRow($file, $rowId);
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $exception->getMessage()
@@ -160,7 +161,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $this->documentService->deleteFile($file);
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $exception->getMessage()
@@ -182,7 +183,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $filePath = $this->documentExportService->exportExcel($file);
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             throw new Exception('Ошибка экспорта EXCEL: ' . $exception->getMessage());
         }
 
@@ -198,7 +199,7 @@ class DocumentController extends BaseController
                 throw new Exception('Файл не найден');
             }
             $filePath = $this->documentExportService->exportPdf($file);
-        } catch (RuntimeException $exception) {
+        } catch (Throwable $exception) {
             throw new Exception('Ошибка экспорта PDF: ' . $exception->getMessage());
         }
 

@@ -75,6 +75,9 @@ final class DocumentService
             throw new RuntimeException('Ошибка при сохранении файла');
         }
 
+        $db = $this->fileModel->db;
+        $db->transStart();
+
         try {
             $spreadsheet = IOFactory::load($filePath);
             $rows = $spreadsheet->getActiveSheet()->toArray();
@@ -92,8 +95,16 @@ final class DocumentService
 
             $this->activityLogInsert((string) $fileId, 'upload', "Загружен файл: {$originalName}");
 
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new RuntimeException('Ошибка транзакции при загрузке файла');
+            }
+
             return (string) $fileId;
         } catch (\Throwable $exception) {
+            $db->transRollback();
+
             if (is_file($filePath)) {
                 unlink($filePath);
             }
@@ -104,58 +115,114 @@ final class DocumentService
 
     public function addRow(FileEntity $file, array $dataPost): string
     {
-        $maxRow = $this->fileRowModel
-            ->selectMax('row_index')
-            ->where('file_id', $file->id)
-            ->asArray()
-            ->first();
+        $db = $this->fileModel->db;
+        $db->transStart();
 
-        $newIndex = (int) ($maxRow['row_index'] ?? 0) + 1;
+        try {
+            $maxRow = $this->fileRowModel
+                ->selectMax('row_index')
+                ->where('file_id', $file->id)
+                ->asArray()
+                ->first();
 
-        $fileRowId = $this->fileRowModel->insert([
-            'file_id' => $file->id,
-            'row_data' => json_encode($dataPost, JSON_UNESCAPED_UNICODE),
-            'row_index' => $newIndex,
-        ]);
+            $newIndex = (int) ($maxRow['row_index'] ?? 0) + 1;
 
-        $this->fileModel->update($file->id, ['row_count' => ($file->row_count ?? 0) + 1]);
-        $this->activityLogInsert($file->id, 'add_row', "Добавлена строка #{$newIndex}");
+            $fileRowId = $this->fileRowModel->insert([
+                'file_id' => $file->id,
+                'row_data' => json_encode($dataPost, JSON_UNESCAPED_UNICODE),
+                'row_index' => $newIndex,
+            ]);
 
-        return (string) $fileRowId;
+            $this->fileModel->update($file->id, ['row_count' => ($file->row_count ?? 0) + 1]);
+            $this->activityLogInsert($file->id, 'add_row', "Добавлена строка #{$newIndex}");
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new RuntimeException('Ошибка транзакции при добавлении строки');
+            }
+
+            return (string) $fileRowId;
+        } catch (\Throwable $exception) {
+            $db->transRollback();
+            throw $exception;
+        }
     }
 
     public function updateRow(FileEntity $file, string $rowId, array $rowData): void
     {
-        $fileRow = $this->findRowForFile($file->id, $rowId);
+        $db = $this->fileModel->db;
+        $db->transStart();
 
-        $this->fileRowModel->update($rowId, [
-            'row_data' => json_encode($rowData, JSON_UNESCAPED_UNICODE),
-        ]);
+        try {
+            $fileRow = $this->findRowForFile($file->id, $rowId);
 
-        $this->activityLogInsert($file->id, 'update_row', "Обновлена строка #{$fileRow->row_index}");
+            $this->fileRowModel->update($rowId, [
+                'row_data' => json_encode($rowData, JSON_UNESCAPED_UNICODE),
+            ]);
+
+            $this->activityLogInsert($file->id, 'update_row', "Обновлена строка #{$fileRow->row_index}");
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new RuntimeException('Ошибка транзакции при обновлении строки');
+            }
+        } catch (\Throwable $exception) {
+            $db->transRollback();
+            throw $exception;
+        }
     }
 
     public function deleteRow(FileEntity $file, string $rowId): void
     {
-        $fileRow = $this->findRowForFile($file->id, $rowId);
+        $db = $this->fileModel->db;
+        $db->transStart();
 
-        $this->fileRowModel->delete($rowId);
+        try {
+            $fileRow = $this->findRowForFile($file->id, $rowId);
 
-        $updatedCount = max(0, ($file->row_count ?? 0) - 1);
-        $this->fileModel->update($file->id, ['row_count' => $updatedCount]);
+            $this->fileRowModel->delete($rowId);
 
-        $this->activityLogInsert($file->id, 'delete_row', "Удалена строка #{$fileRow->row_index}");
+            $updatedCount = max(0, ($file->row_count ?? 0) - 1);
+            $this->fileModel->update($file->id, ['row_count' => $updatedCount]);
+
+            $this->activityLogInsert($file->id, 'delete_row', "Удалена строка #{$fileRow->row_index}");
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new RuntimeException('Ошибка транзакции при удалении строки');
+            }
+        } catch (\Throwable $exception) {
+            $db->transRollback();
+            throw $exception;
+        }
     }
 
     public function deleteFile(FileEntity $file): void
     {
-        if (is_file($file->file_path)) {
-            unlink($file->file_path);
-        }
+        $db = $this->fileModel->db;
+        $db->transStart();
 
-        $this->fileRowModel->where('file_id', $file->id)->delete();
-        $this->activityLogInsert($file->id, 'delete_file', "Удален файл: {$file->original_name}");
-        $this->fileModel->delete($file->id);
+        try {
+            $this->fileRowModel->where('file_id', $file->id)->delete();
+            $this->activityLogInsert($file->id, 'delete_file', "Удален файл: {$file->original_name}");
+            $this->fileModel->delete($file->id);
+
+            $db->transComplete();
+
+            if (!$db->transStatus()) {
+                throw new RuntimeException('Ошибка транзакции при удалении файла');
+            }
+
+            if (is_file($file->file_path)) {
+                unlink($file->file_path);
+            }
+        } catch (\Throwable $exception) {
+            $db->transRollback();
+            throw $exception;
+        }
     }
 
     private function fileRowInsert(string $fileId, array $headers, array $rows): void
